@@ -929,10 +929,11 @@ public abstract class AbstractEndpoint<S, U> {
      *    protocol host name uses the default SSLHostConfig configuration, and false otherwise
      */
     public boolean checkSni(String sniHostName, String protocolHostName) {
-        return (!strictSni || !isSSLEnabled()
-                || (sniHostName != null && sniHostName.equalsIgnoreCase(protocolHostName))
-                || getSSLHostConfig(sniHostName) == getSSLHostConfig(
-                        protocolHostName != null ? protocolHostName.toLowerCase(Locale.ENGLISH) : null));
+        if (!strictSni || !isSSLEnabled()) {
+            return true;
+        }
+        String protocolHostNameLower = protocolHostName != null ? protocolHostName.toLowerCase(Locale.ENGLISH) : null;
+        return getSSLHostConfig(sniHostName) == getSSLHostConfig(protocolHostNameLower);
     }
 
 
