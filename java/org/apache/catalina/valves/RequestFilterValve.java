@@ -25,6 +25,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.authenticator.Constants;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.juli.logging.Log;
@@ -380,7 +381,8 @@ public abstract class RequestFilterValve extends ValveBase {
      * Reject the request that was denied by this valve.
      * <p>
      * If <code>invalidAuthenticationWhenDeny</code> is true and the context has <code>preemptiveAuthentication</code>
-     * set, set an invalid authorization header to trigger basic auth.
+     * set, set an invalid authorization header and require the context's authenticator to authenticate the request.
+     * If the context has no authenticator, the request is denied.
      *
      * @param request  The servlet request to be processed
      * @param response The servlet response to be processed
@@ -391,10 +393,11 @@ public abstract class RequestFilterValve extends ValveBase {
     protected void denyRequest(Request request, Response response) throws IOException, ServletException {
         if (invalidAuthenticationWhenDeny) {
             Context context = request.getContext();
-            if (context != null && context.getPreemptiveAuthentication()) {
+            if (context != null && context.getPreemptiveAuthentication() && context.getAuthenticator() != null) {
                 if (request.getCoyoteRequest().getMimeHeaders().getValue("authorization") == null) {
                     request.getCoyoteRequest().getMimeHeaders().addValue("authorization").setString("invalid");
                 }
+                request.setNote(Constants.REQ_AUTHENTICATION_REQUIRED_NOTE, Integer.valueOf(denyStatus));
                 getNext().invoke(request, response);
                 return;
             }

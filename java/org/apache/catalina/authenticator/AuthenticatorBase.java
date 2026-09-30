@@ -522,6 +522,12 @@ public abstract class AuthenticatorBase extends ValveBase implements Authenticat
 
         boolean authRequired = isContinuationRequired(request);
 
+        // Set by RequestFilterValve when invalidAuthenticationWhenDeny is enabled
+        Integer authRequiredDenyStatus = (Integer) request.getNote(Constants.REQ_AUTHENTICATION_REQUIRED_NOTE);
+        if (authRequiredDenyStatus != null) {
+            authRequired = true;
+        }
+
         Realm realm = this.context.getRealm();
         // Is this request URI subject to a security constraint?
         SecurityConstraint[] constraints = realm.findSecurityConstraints(request, this.context);
@@ -578,7 +584,8 @@ public abstract class AuthenticatorBase extends ValveBase implements Authenticat
             authRequired = true;
         }
 
-        if ((authRequired || constraints != null) && allowCorsPreflightBypass(request)) {
+        if ((authRequired || constraints != null) && authRequiredDenyStatus == null &&
+                allowCorsPreflightBypass(request)) {
             if (log.isDebugEnabled()) {
                 log.debug(sm.getString("authenticator.corsBypass"));
             }
@@ -633,6 +640,13 @@ public abstract class AuthenticatorBase extends ValveBase implements Authenticat
                 return;
             }
 
+            if (authRequiredDenyStatus != null && request.getUserPrincipal() == null) {
+                if (log.isDebugEnabled()) {
+                    log.debug(sm.getString("authenticator.authenticationFail"));
+                }
+                response.sendError(authRequiredDenyStatus.intValue());
+                return;
+            }
         }
 
         if (constraints != null) {

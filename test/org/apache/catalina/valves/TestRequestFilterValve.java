@@ -175,12 +175,8 @@ public class TestRequestFilterValve {
         }
 
         // VERIFY
-        if (!allowed && auth) {
-            Assert.assertEquals(msg.toString(), OK, response.getStatus());
-            Assert.assertEquals(msg.toString(), "invalid", request.getHeader("authorization"));
-        } else {
-            Assert.assertEquals(msg.toString(), expected, response.getStatus());
-        }
+        // The context has no authenticator so denied requests must be rejected even if auth is set
+        Assert.assertEquals(msg.toString(), expected, response.getStatus());
     }
 
     private void standardTests(String allow_pat, String deny_pat, String OnlyAllow, String OnlyDeny,

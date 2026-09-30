@@ -711,7 +711,10 @@
         if the context has the attribute <code>preemptiveAuthentication="true"</code>
         set. An already existing <code>authentication</code> header will not be
         overwritten. In effect this will trigger authentication instead of deny
-        even if the application does not have a security constraint configured.</p>
+        even if the application does not have a security constraint configured.
+        If the request cannot be associated with an authenticated user (e.g. the
+        context has no authenticator or uses <code>NonLoginAuthenticator</code>)
+        the request is denied using <code>denyStatus</code>.</p>
         <p>This can be combined with <code>addConnectorPort</code> to trigger authentication
         depending on the client and the connector that is used to access an application.</p>
       </attribute>
@@ -848,7 +851,10 @@
         if the context has the attribute <code>preemptiveAuthentication="true"</code>
         set. An already existing <code>authentication</code> header will not be
         overwritten. In effect this will trigger authentication instead of deny
-        even if the application does not have a security constraint configured.</p>
+        even if the application does not have a security constraint configured.
+        If the request cannot be associated with an authenticated user (e.g. the
+        context has no authenticator or uses <code>NonLoginAuthenticator</code>)
+        the request is denied using <code>denyStatus</code>.</p>
         <p>This can be combined with <code>addConnectorPort</code> to trigger authentication
         depending on the client and the connector that is used to access an application.</p>
       </attribute>
