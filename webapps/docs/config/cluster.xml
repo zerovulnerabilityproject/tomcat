@@ -63,7 +63,8 @@
         combination with dynamic membership (multicast discovery) but the network communication that manages the dynamic
         membership takes place in the clear. If any nodes (including potentially untrusted nodes) attempt to join a
         cluster using TLS with dynamic membership without the correct TLS configuration, it will trigger a significant
-        amount of logging until those nodes stop attempting to join the cluster.</li>
+        amount of logging until those nodes stop attempting to join the cluster. When the <code>Channel</code> is
+        configured as secure, channel messages received via multicast are ignored.</li>
   </ul>
 
   <p>
