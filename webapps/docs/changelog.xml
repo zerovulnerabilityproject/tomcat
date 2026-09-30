@@ -319,6 +319,12 @@
         buffer used by the BIO pair. Patch submitted by Lukas Hellebrandt.
         (remm)
       </fix>
+      <fix>
+        Ensure that <code>strictSni</code> compares host names using ASCII
+        case-insensitive matching and always compares the resolved
+        <code>SSLHostConfig</code>s so that non-ASCII SNI host names cannot
+        bypass the check.
+      </fix>
       <!-- Entries for backport and removal before 12.0.0-M1 below this line -->
       <update>
         Allow UDP based protocols (without conflicting with a TCP based
