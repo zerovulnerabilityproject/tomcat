@@ -2623,6 +2623,69 @@ public class TestAsyncContextImpl extends TomcatBaseTest {
 
 
     @Test
+    public void testDispatchEncodedSemicolonTraversal() throws Exception {
+        doTestDispatchEncodedSemicolon("/async/..%3B/secret/data", "/async/..;/secret/data");
+    }
+
+
+    @Test
+    public void testDispatchEncodedSemicolon() throws Exception {
+        doTestDispatchEncodedSemicolon("/async/foo%3Bx/bar", "/async/foo;x/bar");
+    }
+
+
+    private void doTestDispatchEncodedSemicolon(String uri, String expectedPath) throws Exception {
+        // Setup Tomcat instance
+        Tomcat tomcat = getTomcatInstance();
+
+        // No file system docBase required
+        Context ctx = getProgrammaticRootContext();
+
+        Wrapper wrapper = Tomcat.addServlet(ctx, "semicolonDispatchServlet", new SemicolonDispatchServlet());
+        wrapper.setAsyncSupported(true);
+        ctx.addServletMapping("/async/*", "semicolonDispatchServlet");
+
+        Tomcat.addServlet(ctx, "secret", new SecretServlet());
+        ctx.addServletMapping("/secret/*", "secret");
+
+        tomcat.start();
+
+        ByteChunk body = new ByteChunk();
+        int rc = getUrl("http://localhost:" + getPort() + uri, body, null);
+
+        Assert.assertEquals(HttpServletResponse.SC_OK, rc);
+        Assert.assertEquals("OK:" + expectedPath, body.toString());
+    }
+
+
+    private static final class SemicolonDispatchServlet extends HttpServlet {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            if (DispatcherType.ASYNC == req.getDispatcherType()) {
+                resp.getWriter().print("OK:" + req.getServletPath() + req.getPathInfo());
+            } else {
+                AsyncContext ac = req.startAsync();
+                ac.dispatch();
+            }
+        }
+    }
+
+
+    private static final class SecretServlet extends HttpServlet {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            resp.getWriter().print("SECRET");
+        }
+    }
+
+
+    @Test
     public void testAsyncIoEnd00() throws Exception {
         doTestAsyncIoEnd(false, false);
     }
