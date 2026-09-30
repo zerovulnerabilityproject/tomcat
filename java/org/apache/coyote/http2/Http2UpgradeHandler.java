@@ -1943,7 +1943,8 @@ class Http2UpgradeHandler extends AbstractStream implements InternalHttpUpgradeH
             if (average < overheadThreshold) {
                 // For Streams, client might only release the minimum so check
                 // against current demand
-                if (increment < stream.getConnectionAllocationRequested()) {
+                int connectionAllocationRequested = stream.getConnectionAllocationRequested();
+                if (connectionAllocationRequested == 0 || increment < connectionAllocationRequested) {
                     // The smaller the increment, the larger the overhead
                     increaseOverheadCount(FrameType.WINDOW_UPDATE, overheadThreshold / average);
                 }

@@ -76,6 +76,35 @@ public class TestHttp2Limits extends Http2TestBase {
 
 
     @Test
+    public void testStreamWindowUpdateOverheadLimits() throws Exception {
+        http2Connect();
+        String errMsg = sm.getString("upgradeHandler.tooMuchOverhead", "\\p{XDigit}++").replace("[", "\\[");
+        String overHeadMsgRegx = "0-Goaway-\\[3]-\\[11]-\\[" + errMsg + "]";
+
+        // Open stream 3 without sending the request body so it stays open
+        sendSimplePostRequest(3, null, false);
+
+        try {
+            // Small stream level WINDOW_UPDATE frames when the stream is not waiting for an allocation from the
+            // connection flow control window should be treated as overhead
+            for (int i = 0; i < 4; i++) {
+                sendWindowUpdate(3, 1);
+            }
+            sendPing();
+
+            parser.readFrame();
+        } catch (IOException ioe) {
+            // Server closed connection before client has a chance to read
+            // the Goaway frame. Treat this as a pass.
+            return;
+        }
+
+        String trace = output.getTrace();
+        Assert.assertTrue("Unexpected output: " + trace, trace.matches(overHeadMsgRegx));
+    }
+
+
+    @Test
     public void testHeaderLimits1x128() throws Exception {
         // Well within limits
         doTestHeaderLimits(1, 128, FailureMode.NONE);
