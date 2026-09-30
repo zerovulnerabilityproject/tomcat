@@ -349,6 +349,11 @@
         Ensure that the non-blocking write buffer is empty before sending an AJP
         end response message. (markt)
       </fix>
+      <fix>
+        Restore the overhead penalty for small stream level
+        <code>WINDOW_UPDATE</code> frames received when the stream is not
+        waiting for an allocation from the connection flow control window.
+      </fix>
     </changelog>
   </subsection>
   <subsection name="Jasper">
