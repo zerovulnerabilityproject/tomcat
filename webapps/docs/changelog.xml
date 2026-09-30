@@ -133,6 +133,14 @@
         Prevent duplicate log messages when clustering JARs are not present on
         startup. (csutherl)
       </fix>
+      <fix>
+        Ensure that requests denied by <code>RemoteCIDRValve</code> or
+        <code>RemoteHostValve</code> with
+        <code>invalidAuthenticationWhenDeny="true"</code> are required to
+        authenticate even when no security constraint applies, rather than
+        being passed through without authentication. If authentication is not
+        possible the request is denied.
+      </fix>
       <add>
         Add support for configuring TLS pre-shared keys under an
         <code>SSLHostConfig</code>. (markt)

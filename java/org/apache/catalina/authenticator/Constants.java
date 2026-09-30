@@ -105,6 +105,14 @@ public class Constants {
      */
     public static final String REQ_JASPIC_SUBJECT_NOTE = "org.apache.catalina.authenticator.jaspic.SUBJECT";
 
+    /**
+     * The notes key used to signal that authentication must be enforced for the current request, even if no security
+     * constraint applies. The value is the {@link Integer} HTTP status code to send if the request cannot be
+     * associated with an authenticated user.
+     */
+    public static final String REQ_AUTHENTICATION_REQUIRED_NOTE =
+            "org.apache.catalina.authenticator.AUTHENTICATION_REQUIRED";
+
 
     // ---------------------------------------------------------- Session Notes
 
