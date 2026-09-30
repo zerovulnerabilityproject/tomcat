@@ -133,6 +133,17 @@ public class AsyncContextImpl implements AsyncContext, AsyncContextCallback {
      */
     static ThreadLocal<Boolean> uriEncoded = ThreadLocal.withInitial(() -> Boolean.FALSE);
 
+    /*
+     * Encoder for the decoded original request path used by dispatch(). ';' must be encoded as it is treated as the
+     * start of a path parameter by ServletContext.getRequestDispatcher().
+     */
+    private static final URLEncoder DISPATCH_PATH_ENCODER;
+
+    static {
+        DISPATCH_PATH_ENCODER = (URLEncoder) URLEncoder.DEFAULT.clone();
+        DISPATCH_PATH_ENCODER.removeSafeCharacter(';');
+    }
+
     /**
      * Constructs an AsyncContextImpl for the given request.
      *
@@ -238,11 +249,12 @@ public class AsyncContextImpl implements AsyncContext, AsyncContextCallback {
         /*
          * This is a dispatch of the original request path. That path will always be URI-decoded. That will cause
          * problems in ServletContext.getRequestDispatcher() if the decoded URI contains a literal '?' as it will be
-         * treated as a query delimiter. Therefore, ignore context.getDispatchersUseEncodedPaths() here and always
-         * encode. Also need to mark this request as ignoring context.getDispatchersUseEncodedPaths() so it is handled
-         * correctly in ServletContext.getRequestDispatcher().
+         * treated as a query delimiter. Similarly, a literal ';' would be treated as the start of a path parameter.
+         * Therefore, ignore context.getDispatchersUseEncodedPaths() here and always encode (including ';'). Also need
+         * to mark this request as ignoring context.getDispatchersUseEncodedPaths() so it is handled correctly in
+         * ServletContext.getRequestDispatcher().
          */
-        path = URLEncoder.DEFAULT.encode(path, StandardCharsets.UTF_8);
+        path = DISPATCH_PATH_ENCODER.encode(path, StandardCharsets.UTF_8);
         try {
             uriEncoded.set(Boolean.TRUE);
             dispatch(path);

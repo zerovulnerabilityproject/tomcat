@@ -253,6 +253,12 @@
       </fix>
       <!-- Entries for backport and removal before 12.0.0-M1 below this line -->
       <fix>
+        Ensure that <code>AsyncContext.dispatch()</code> encodes any literal
+        <code>';'</code> characters in the decoded original request path so
+        they are not treated as path parameter delimiters when the dispatch
+        target is mapped.
+      </fix>
+      <fix>
         When starting a web application, don't try and use the web application
         class loader until after the web application class loader has started.
         (markt)
