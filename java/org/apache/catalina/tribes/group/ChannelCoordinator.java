@@ -186,8 +186,13 @@ public class ChannelCoordinator extends ChannelInterceptorBase implements Messag
             if (Channel.MBR_RX_SEQ == (svc & Channel.MBR_RX_SEQ)) {
                 membershipService.setMembershipListener(this);
                 membershipService.setChannel(getChannel());
-                if (membershipService instanceof McastService) {
-                    ((McastService) membershipService).setMessageListener(this);
+                if (membershipService instanceof McastService mcastService) {
+                    // Multicast is not authenticated so a secure channel must not accept messages from it
+                    if (getChannel() instanceof GroupChannel groupChannel && groupChannel.getSecure()) {
+                        mcastService.setMessageListener(null);
+                    } else {
+                        mcastService.setMessageListener(this);
+                    }
                 }
                 membershipService.start(MembershipService.MBR_RX);
                 valid = true;

@@ -28,6 +28,7 @@ import org.apache.catalina.tribes.ChannelMessage;
 import org.apache.catalina.tribes.Member;
 import org.apache.catalina.tribes.MembershipProvider;
 import org.apache.catalina.tribes.MessageListener;
+import org.apache.catalina.tribes.group.GroupChannel;
 import org.apache.catalina.tribes.io.ChannelData;
 import org.apache.catalina.tribes.io.XByteBuffer;
 import org.apache.catalina.tribes.jmx.JmxRegistry;
@@ -447,6 +448,12 @@ public class McastService extends MembershipServiceBase implements MessageListen
 
     @Override
     public void messageReceived(ChannelMessage msg) {
+        if (channel instanceof GroupChannel groupChannel && groupChannel.getSecure()) {
+            if (log.isDebugEnabled()) {
+                log.debug(sm.getString("mcastService.secureMessageDropped"));
+            }
+            return;
+        }
         if (msglistener != null && msglistener.accept(msg)) {
             msglistener.messageReceived(msg);
         }
